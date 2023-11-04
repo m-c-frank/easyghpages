@@ -64,9 +64,6 @@ echo "2. Save, and GitHub will create a CNAME file in your repo."
 echo "3. Follow GitHub's instructions to verify your domain if required."
 ask_to_proceed
 
-# Switch to the repository directory
-cd $REPO_NAME || { echo "Failed to enter the directory for the repository."; exit 1; }
-
 # Personalize the README.md file
 sed -i "1s/.*/# ${REPO_NAME} setup by ${GITHUB_USERNAME}/" README.md
 git add README.md
