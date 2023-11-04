@@ -1,14 +1,11 @@
-# easyghpages
+# easyghpages Publishing Markdown with GitHub Pages and Custom Domain
 
-Publishing Markdown with GitHub Pages and Custom Domain
-
-This README provides a script for an interactive CLI setup to publish a markdown file using GitHub Pages with a custom domain. Make sure to fork this repository or create your own to proceed.
+This README provides a script for an interactive CLI setup to publish a `README.md` file using GitHub Pages with a custom domain. Use the setup script to fork this repository into your own account and set up GitHub Pages.
 
 ## Prerequisites
 
 - A GitHub account.
 - The `gh` CLI installed and authenticated.
-- A custom domain already set up on Namecheap or another DNS provider.
 
 ## Interactive CLI Setup
 
@@ -18,72 +15,64 @@ To begin the interactive setup, execute the following command in your terminal:
 curl -s https://raw.githubusercontent.com/m-c-frank/easyghpages/main/setup.sh | bash
 ```
 
-The script will print detailed steps and ask for confirmations throughout the setup process.
+The script will guide you through the detailed steps and ask for confirmation at the end of each major section in the setup process.
 
 ## `setup.sh` Script
 
 ```bash
 #!/bin/bash
 
-# Function to print a step and ask for confirmation
-confirm_step() {
-    echo "$1"
-    read -p "Have you completed this step? (y/n): " RESPONSE
-    if [[ $RESPONSE != "y" ]]; then
-        echo "Please complete this step to proceed."
-	confirm_step()
-    fi
+# Helper function to prompt the user for confirmation
+ask_to_proceed() {
+    read -p "Press ENTER when you're ready to continue."
 }
 
-# Introduction
-echo "This script will guide you through setting up your markdown file with GitHub Pages and a custom domain."
+# Fork the repository to your account
+gh repo fork m-c-frank/easyghpages --clone=true --remote=true
 
-# Step 1: Confirm domain setup on Namecheap
-confirm_step "Step 1: Confirm you have a custom domain set up on Namecheap or another DNS provider."
+# Determine the name of the forked repository
+REPO_NAME=$(basename $(gh repo view --json name -q .name))
 
-# Step 2: DNS Configuration Steps on Namecheap
-echo "Step 2: DNS Configuration Steps on Namecheap:"
-confirm_step " 2.1. Log in to your Namecheap account and navigate to the Dashboard."
-confirm_step " 2.2. Click on 'Manage' next to your domain."
-confirm_step " 2.3. Access the 'Advanced DNS' tab."
-confirm_step " 2.4. Add a CNAME record with Host as 'www' and Value as '<your-github-username>.github.io'."
-confirm_step " 2.5. For the apex domain, add A records with Host as '@' and Value as GitHub's IP addresses."
-confirm_step " 2.6. Save the DNS changes and wait for them to propagate (up to 48 hours)."
+# Get your GitHub username
+GITHUB_USERNAME=$(gh api user --jq .login)
 
-# Step 3: GitHub Pages Activation
-echo "Step 3: Manual Activation of GitHub Pages:"
-confirm_step " 3.1. Navigate to your GitHub repository."
-confirm_step " 3.2. Go to 'Settings' and locate the 'Pages' section."
-confirm_step " 3.3. Select the branch to deploy and save your settings."
-confirm_step " 3.4. Enter your custom domain in the 'Custom domain' field and save."
+# Get your desired custom domain name
+read -p "Type the domain name you want to use and press ENTER: " DOMAIN
 
-# Ask for GitHub details
-read -p "Enter your GitHub username: " GITHUB_USERNAME
-read -p "Enter the repository name: " REPO_NAME
-read -p "Enter your custom domain: " DOMAIN
-read -p "Enter the path to your markdown file: " MARKDOWN_FILE
+# Instructions for DNS configuration
+echo "Let's set up your domain. Follow these instructions:"
+echo "1. Sign in to your domain registrar's website."
+echo "2. Find the DNS settings page."
+echo "3. Add a CNAME record for 'www' pointing to '${GITHUB_USERNAME}.github.io'."
+echo "4. Add A records for the apex domain (e.g., 'yourdomain.com') using GitHub's IP addresses."
+echo "GitHub's current IPs are: 185.199.108.153, 185.199.109.153, 185.199.110.153, 185.199.111.153."
+echo "Changes might take some time to take effect, often up to 48 hours."
+ask_to_proceed
 
-# Clone the repository
-git clone https://github.com/$GITHUB_USERNAME/$REPO_NAME.git
-cd $REPO_NAME || exit
+# Instructions for enabling GitHub Pages
+echo "Now, let's turn on GitHub Pages for your repository."
+echo "1. Go to your GitHub repository in a web browser."
+echo "2. Click 'Settings', then find 'Pages' in the side menu."
+echo "3. Choose the branch you want to deploy, typically 'main' or 'master'."
+echo "4. Click 'Save' to activate GitHub Pages."
+ask_to_proceed
 
-# Add and commit markdown file
-git add "$MARKDOWN_FILE"
-git commit -m "Add markdown file"
-confirm_step "The markdown file has been added to the repository."
+# Instructions for setting up the custom domain in GitHub
+echo "Lastly, we'll connect your domain to GitHub Pages."
+echo "1. In the 'Pages' settings, type your custom domain in the 'Custom domain' field."
+echo "2. Save, and GitHub will create a CNAME file in your repo."
+echo "3. Follow GitHub's instructions to verify your domain if required."
+ask_to_proceed
 
-# Push to GitHub
-git branch -M main
-git remote set-url origin https://github.com/$GITHUB_USERNAME/$REPO_NAME.git
-git push -u origin main
-confirm_step "The changes have been pushed to the GitHub repository."
+# Switch to the repository directory
+cd $REPO_NAME || { echo "Failed to enter the directory for the repository."; exit 1; }
 
-# Add CNAME for custom domain
-echo $DOMAIN > CNAME
-git add CNAME
-git commit -m "Configure custom domain"
+# Personalize the README.md file
+sed -i "1s/.*/# ${REPO_NAME} setup by ${GITHUB_USERNAME}/" README.md
+git add README.md
+git commit -m "Customize README.md"
 git push
-confirm_step "The CNAME file created and pushed. Your custom domain is now set up."
 
-echo "Setup is complete. Please check your GitHub Pages settings to ensure everything is configured correctly."
+echo "All done! Your website should be live soon. Check the 'Pages' settings on GitHub to confirm."
+
 ```
