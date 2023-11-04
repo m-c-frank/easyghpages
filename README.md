@@ -1,4 +1,4 @@
-# easyghpages Publishing Markdown with GitHub Pages and Custom Domain
+# easyghpages setup by m-c-frank
 
 This README provides a script for an interactive CLI setup to publish a `README.md` file using GitHub Pages with a custom domain. Use the setup script to fork this repository into your own account and set up GitHub Pages.
 
