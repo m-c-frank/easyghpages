@@ -6,7 +6,7 @@ confirm_step() {
     read -p "Have you completed this step? (y/n): " RESPONSE
     if [[ $RESPONSE != "y" ]]; then
         echo "Please complete this step to proceed."
-	confirm_step()
+	confirm_step
     fi
 }
 
